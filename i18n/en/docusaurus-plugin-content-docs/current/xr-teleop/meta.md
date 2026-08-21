@@ -6,6 +6,8 @@ sidebar_position: 2
 
 <div className="bingru-theme" />
 
+import GearIcon from './Screenshots/gear.svg';
+
 # USER MANUAL FOR META QUEST
 
 Human-Robot TeleOperation for Meta Quest
@@ -44,7 +46,7 @@ Check your controller battery level before using. If it is too low, the controll
 
 ### Boundary
 
-We use your boundary settings to determine the location of the real-world floor and display the position of the virtual robotic arm. If you haven't set up your room boundary, the system UI and virtual robotic arm may appear too high or too low during teleoperation. Please check if your room boundary is correctly configured in <i><b>Quick Control > Boundary</b></i>. Don't recommend to proceed with <i><b>Stationary</b></i>.
+We use your boundary settings to determine the location of the real-world floor and display the position of the virtual robotic arm. If you haven't set up your room boundary, the system UI and virtual robotic arm may appear too high or too low during teleoperation. Please check if your room boundary is correctly configured in <i><b>Quick Control > Boundary</b></i>. You must setup the floor height correctly.
 
 ### Language
 
@@ -80,6 +82,21 @@ This mode uses UDP to send tracking data. It is the default mode and is recommen
 
 This mode uses TCP to send tracking data. It is slower and may have higher latency. You are recommended to choose this mode when you have bad or unstable network connection, like Wi-Fi.
 
+### Body Tracking
+
+#### Effortless Full-body Tracking
+
+:::tip Tip
+This feature is supported after version 1.0.8
+:::
+
+This feature is designed for trackerless teleoperation, taking use of left/right controller and head position to simulate full-body ik within the app. Before using, please make sure the controller and head tracking keep tracked, and switch the mode to this option, click on `Calibrate` and stretch your arms for 5 seconds. If the skeleton shows up, you're ready to go.
+
+<figure style={{margin: 0, width: '100%'}}>
+    <img src={require("./Screenshots/EffortlessFullbody_skeleton.jpg").default} alt="Effortless full-body tracking" />
+    <figcaption>Teleoperation in Effortless Full-body Tracking mode</figcaption>
+</figure>
+
 ## Connect to host
 
 This interface would be shown after you enter the app.
@@ -98,7 +115,7 @@ Once you fill IP and height, click on `Connect` button to connect to host.
     - You will receive two short vibration on controllers both hands.
     - The `Connection` icon will change.
 - Connect fail: 
-    - You will receive a long vibration on controllers owners both hands.
+    - You will receive a long vibration on controllers both hands.
     - The `Connection` icon does not make any changes.
 
 ### Host Recording
@@ -168,9 +185,9 @@ There are two modes when viewing XR stream: `First-Person` and `Free Cam` mode. 
 This is for developer use only. You may bring safety issues to both of your device and the robot. Please enable it only when you know what you are doing.
 :::
 
-Double click on `KernalM` logo on the top row of the panel to open developer panel. You will see new options appear next to the main panel. The App uses TCP for host communication, UDP for robot control and receives teleoperation data from robot, and WebRTC for video streaming.
+Click on <GearIcon style={{width: '20px', height: '20px', verticalAlign: 'middle', display: 'inline-block'}} /> logo on the top row of the panel to open developer panel. You will see new options appear next to the main panel. The App uses TCP for host communication, UDP for robot control and receives teleoperation data from robot, and WebRTC for video streaming.
 
-Double click again to close developer panel.
+Click again to close developer panel.
 
 <figure>
     <img src={require("./Screenshots/teleop_debugmode.jpg").default} alt="Developer Mode" />
@@ -209,7 +226,7 @@ In developer mode, you can check the communication details and specific logs bet
     </tr>
     <tr><td>Left Hand</td><td>Y Button</td><td>Start teleoperation</td></tr>
     <tr><td>Left Hand</td><td>X Button</td><td>Exit teleoperation</td></tr>
-    <tr><td>Right Hand</td><td>A Button</td><td>Show/Hide video window</td></tr>
+    <tr><td>Right Hand</td><td>A Button</td><td>Robot pose reset</td></tr>
     <tr><td>Right Hand</td><td>B Button</td><td>Start/Stop host recording</td></tr>
     <tr><td>Right Hand</td><td>Menu Button</td><td>Hold to reset XR origin</td></tr>
     <tr><td>Both Hands</td><td>Trigger</td><td>Click UI, Control Gripper</td></tr>
@@ -219,4 +236,29 @@ In developer mode, you can check the communication details and specific logs bet
 
 ## Known issues
 
-- [To be updated.]
+### Why does the robotic arm twitch or slowly drift when the controller is fully occluded?
+
+This system uses optical tracking between the headset and controllers. If the controller is fully occluded, tracking is lost. However, detecting tracking loss requires a brief time threshold. If the controller is abruptly blocked and quickly restored, the underlying system may fail to notify the application layer in time.
+
+While we have implemented jitter filtering for safety, slow pose drift cannot be entirely eliminated. **If users notice any slow drifting during teleoperation, they should stop operating immediately.**
+
+Control of the robotic arm will automatically and immediately halt if optical tracking is confirmed lost or if controller batteries are depleted.
+
+### Cannot find the "Unknown Sources" entry on Quest and unable to open the app?
+
+Solution 1: Launch via ADB command
+
+Connect Quest to a PC via USB cable. You need to manually allow USB debugging for this computer on the headset prompt. Run the following ADB command in command line to launch the app directly:
+```bash
+adb shell monkey -p com.KernalMind.Apex_Teleop -c android.intent.category.LAUNCHER 1
+```
+
+Solution 2: Install AnExplorer VR File Manager and Quest Tool
+
+1. Search and install `AnExplorer VR File Manager` from the official Quest Store (this app will not appear in Unknown Sources). To install the `Quest Tool` app, visit the [Quest Tool Download Page](https://quest.vrzwk.cn/download#client-downloads) to get the package.
+2. Open `AnExplorer` in the headset, and launch `Quest Tool` inside it.
+3. Launch the `Apex Teleop` app from within `Quest Tool`.
+
+Solution 3: Connect via Proxy Network
+
+Connect to a proxy network routed to a US node. Once connected, the "Unknown Sources" entry in the Quest system interface will usually reappear.

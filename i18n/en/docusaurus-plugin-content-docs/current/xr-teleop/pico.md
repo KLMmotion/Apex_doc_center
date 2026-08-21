@@ -6,6 +6,8 @@ sidebar_position: 1
 
 <div className="bingru-theme" />
 
+import GearIcon from './Screenshots/gear.svg';
+
 # USER MANUAL FOR PICO
 
 Human-Robot TeleOperation for Pico
@@ -44,7 +46,7 @@ Check your controller battery level before using. If it is too low, the controll
 
 ### Room Boundary
 
-We use your room boundary settings to determine the location of the real-world floor and display the position of the virtual robotic arm. If you haven't set up your room boundary, the system UI and virtual robotic arm may appear too high or too low during teleoperation. Please check if your room boundary is correctly configured in <i><b>Settings > General > Room Boundary</b></i>. Don't recommend to proceed with <i><b>Stationary</b></i>.
+We use your room boundary settings to determine the location of the real-world floor and display the position of the virtual robotic arm. If you haven't set up your room boundary, the system UI and virtual robotic arm may appear too high or too low during teleoperation. Please check if your room boundary is correctly configured in <i><b>Settings > General > Room Boundary</b></i>. You must setup the floor height correctly.
 
 ### Language
 
@@ -81,6 +83,16 @@ If the robotic arm is equipped with a dexterous hand select Gloves on the XR sid
     </figure>
 </div>
 
+### Transport Protocol
+
+#### Best-Effort
+
+This mode uses UDP to send tracking data. It is the default mode and is recommended for most users. However this causes packet drop and may have jitters. You are recommended to choose this mode when you have good network connection like wired connection.
+
+#### Reliable
+
+This mode uses TCP to send tracking data. It is slower and may have higher latency. You are recommended to choose this mode when you have bad or unstable network connection, like Wi-Fi.
+
 ### Body Tracking
 
 #### PICO Full-body Tracking Feature
@@ -110,16 +122,6 @@ This feature is an alternative for PICO full-body tracking feature. It is design
     <img src={require("./Screenshots/EffortlessFullbody_skeleton.jpg").default} alt="Effortless full-body tracking" />
     <figcaption>Teleoperation in Effortless Full-body Tracking mode</figcaption>
 </figure>
-
-### Transport Protocol
-
-#### Best-Effort
-
-This mode uses UDP to send tracking data. It is the default mode and is recommended for most users. However this causes packet drop and may have jitters. You are recommended to choose this mode when you have good network connection like wired connection.
-
-#### Reliable
-
-This mode uses TCP to send tracking data. It is slower and may have higher latency. You are recommended to choose this mode when you have bad or unstable network connection, like Wi-Fi.
 
 ## Connect to host
 
@@ -209,9 +211,9 @@ There are two modes when viewing XR stream: `First-Person` and `Free Cam` mode. 
 This is for developer use only. You may bring safety issues to both of your device and the robot. Please enable it only when you know what you are doing.
 :::
 
-Double click on `KernalM` logo on the top row of the panel to open developer panel. You will see new options appear next to the main panel. The App uses TCP for host communication, UDP for robot control and receives teleoperation data from robot, and WebRTC for video streaming.
+Click on <GearIcon style={{width: '20px', height: '20px', verticalAlign: 'middle', display: 'inline-block'}} /> logo on the top row of the panel to open developer panel. You will see new options appear next to the main panel. The App uses TCP for host communication, UDP for robot control and receives teleoperation data from robot, and WebRTC for video streaming.
 
-Double click again to close developer panel.
+Click again to close developer panel.
 
 <figure>
     <img src={require("./Screenshots/teleop_debugmode.jpg").default} alt="Developer Mode" />
@@ -241,7 +243,7 @@ In developer mode, you can check the communication details and specific logs bet
   <tbody>
     <tr>
       <td>Left Hand</td><td>Menu Button</td><td>Maximize/Minimize Panel</td>
-      <td rowSpan={10}>
+      <td rowSpan={13}>
         <figure style={{margin: 0}}>
           <img src={require("./Screenshots/picoultracontroller.png").default} alt="Pico 4 Ultra Controller" width={380} />
           <figcaption style={{textAlign: 'center'}}>Pico 4 Ultra Controller</figcaption>
@@ -250,16 +252,25 @@ In developer mode, you can check the communication details and specific logs bet
     </tr>
     <tr><td>Left Hand</td><td>Y Button</td><td>Start teleoperation</td></tr>
     <tr><td>Left Hand</td><td>X Button</td><td>Exit teleoperation</td></tr>
-    <tr><td>Right Hand</td><td>A Button</td><td>Show/Hide video window</td></tr>
+    <tr><td>Right Hand</td><td>A Button</td><td>Robot pose reset</td></tr>
     <tr><td>Right Hand</td><td>B Button</td><td>Start/Stop host recording</td></tr>
     <tr><td>Right Hand</td><td>Menu Button</td><td>Hold to reset XR origin</td></tr>
     <tr><td>Both Hands</td><td>Trigger</td><td>Click UI, Control Gripper</td></tr>
     <tr><td>Both Hands</td><td>Grip</td><td>Hold to control robot</td></tr>
     <tr><td>Left Hand</td><td>Thumbstick(Press and push)</td><td>Robot base rotation</td></tr>
     <tr><td>Right Hand</td><td>Thumbstick(Press and push)</td><td>Robot base translation</td></tr>
+    <tr><td>Left Hand</td><td>Thumbstick(Long press)</td><td>Enable full-body chassis control</td></tr>
+    <tr><td>Right Hand</td><td>Thumbstick(Long press)</td><td>Enable thumbstick chassis control</td></tr>
+    <tr><td>Both Hands</td><td>Thumbstick(Long press both)</td><td>Disable chassis movement</td></tr>
   </tbody>
 </table>
 
 ## Known issues
 
-- [To be updated.]
+### Why does the robotic arm twitch or slowly drift when the controller is fully occluded?
+
+This system uses optical tracking between the headset and controllers. If the controller is fully occluded, tracking is lost. However, detecting tracking loss requires a brief time threshold. If the controller is abruptly blocked and quickly restored, the underlying system may fail to notify the application layer in time.
+
+While we have implemented jitter filtering for safety, slow pose drift cannot be entirely eliminated. **If users notice any slow drifting during teleoperation, they should stop operating immediately.**
+
+Control of the robotic arm will automatically and immediately halt if optical tracking is confirmed lost or if controller batteries are depleted.
